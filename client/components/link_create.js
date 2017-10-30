@@ -1,52 +1,60 @@
 // import { Meteor } from 'meteor/meteor'
 import React, { Component } from 'react'
-import { Form, Button, Grid, Icon, Message } from 'semantic-ui-react'
+import { Form, Button, Grid, Icon, Message, Input } from 'semantic-ui-react'
 
 export default class LinkCreate extends Component {
     state = {
         url: '',
         error: true,
-        submit: false
+        submit: false,
+        errorMessage: ''
     }
     onInputChange = (e) => {
-        this.setState({
-            url: e.target.value,
-            error: false
-        })
-    }
-    onFormSubmit = (e) => {
-        e.preventDefault()
-        if(this.state.url === '') {
-            return false;
+        if(e.target.value === '') {
+            this.setState({
+                error: true,
+                url: e.target.value,
+                errorMessage: ''
+            })
         } else {
-            this.setState({ submit: true })
-            Meteor.call('links.insert', this.state.url, (err) => {
-                this.setState({ submit: false })
-                // error message here
-                if(err) {
-                    // do stuff with error here
-
-                } else {
-                    // you have successfully save to database
-                    this.setState({ url: '' })
-                }
+            this.setState({
+                url: e.target.value,
+                error: false
             })
         }
     }
+    onFormSubmit = (e) => {
+        e.preventDefault()
+        // this.setState({ submit: true })
+        Meteor.call('links.insert', this.state.url, (err) => {
+            this.setState({ submit: false })
+            // error message here
+            if(err) {
+                // do stuff with error here
+                this.setState({
+                    errorMessage: 'Enter a valid URL'
+                })
+            } else {
+                // you have successfully save to database
+                this.setState({ url: '' , error: true, submit: false, errorMessage: '' })
+            }
+        })
+    }
     render() {
+        const errorDiv = <Message info>
+                            <Message.Header>{this.state.errorMessage}</Message.Header>
+                        </Message>
         return (
             <Grid centered columns = {2}>
                 <Grid.Column>
                     <Form onSubmit = {this.onFormSubmit} loading = {this.state.submit}>
                         <Form.Field>
                             <label>Link to shorten</label>
-                            <input placeholder = 'Enter your long url to shorten' onChange = {this.onInputChange} value = {this.state.url}/>
+                            {this.state.errorMessage ? errorDiv : ""}
+                            <Input placeholder = 'Enter your long url to shorten' onChange = {this.onInputChange} value = {this.state.url}/>
                         </Form.Field>
-                        <Button type='submit' animated disabled = {this.state.error}>
-                            <Button.Content visible>Shorten</Button.Content>
-                            <Button.Content hidden>
-                                <Icon name='right arrow' />
-                            </Button.Content>
+                        <Button type='submit' disabled = {this.state.error}>
+                            Submit
                         </Button>
                     </Form>
                 </Grid.Column>

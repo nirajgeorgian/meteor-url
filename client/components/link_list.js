@@ -2,10 +2,14 @@ import React, { Component } from 'react'
 import { createContainer } from 'react-meteor-data'
 import { Links } from '../../imports/collections/links'
 
+import TableData from './table_data'
+
 class LinkList extends Component {
     render() {
         return (
-            <div>dodo</div>
+            <div>
+                <TableData data = {this.props.links} />
+            </div>
         )
     }
 }
@@ -13,6 +17,6 @@ class LinkList extends Component {
 export default createContainer(() => {
     Meteor.subscribe('links')
     return {
-        links: Links.find({})
-    }    
+        links: Links.find({}).fetch()
+    }
 },LinkList)
